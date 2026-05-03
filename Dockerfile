@@ -15,9 +15,9 @@ COPY requirements.txt .
 
 # Install CPU-only PyTorch first (prevents downloading GPU version)
 RUN pip install --no-cache-dir \
-    torch==2.1.0+cpu \
-    torchaudio==2.1.0+cpu \
-    torchvision==0.16.0+cpu \
+    torch==2.3.0+cpu \
+    torchaudio==2.3.0+cpu \
+    torchvision==0.18.0+cpu \
     --index-url https://download.pytorch.org/whl/cpu
 
 # Install remaining dependencies
