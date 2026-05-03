@@ -41,6 +41,7 @@
 #         status_color = color_map.get(urgency_level, "green")
 
 #         history_item = HistoryItem(
+            history_id=new_history.history_id,
 #             scan_id=new_history.scan_id,
 #             disease_name=disease_name,
 #             urgency_level=urgency_level,
@@ -96,6 +97,7 @@
 #                     disease_name = h.scan.disease.name
 
 #             scans.append(HistoryItem(
+                history_id=h.history_id,
 #                 scan_id=h.scan_id,
 #                 disease_name=disease_name,
 #                 urgency_level=urgency_level,
@@ -191,6 +193,7 @@
 #             urgency_level = new_history.scan.urgency_level or "Low"
 
 #         history_item = HistoryItem(
+            history_id=new_history.history_id,
 #             scan_id=new_history.scan_id,
 #             disease_name=disease_name,
 #             urgency_level=urgency_level,
@@ -231,6 +234,7 @@
 #                     disease_name = h.scan.disease.name
 
 #             scans.append(HistoryItem(
+                history_id=h.history_id,
 #                 scan_id=h.scan_id,
 #                 disease_name=disease_name,
 #                 urgency_level=urgency_level,
@@ -312,6 +316,7 @@ def add_to_history(
             urgency_level = new_history.scan.urgency_level or "Low"
 
         history_item = HistoryItem(
+            history_id=new_history.history_id,
             scan_id=new_history.scan_id,
             disease_name=disease_name,
             urgency_level=urgency_level,
@@ -362,6 +367,7 @@ def get_my_history(
                     disease_name = h.scan.disease.name
 
             scans.append(HistoryItem(
+                history_id=h.history_id,
                 scan_id=h.scan_id,
                 disease_name=disease_name,
                 urgency_level=urgency_level,

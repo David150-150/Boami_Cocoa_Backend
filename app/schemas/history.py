@@ -6,6 +6,7 @@ from datetime import datetime
 #                   HISTORY ITEM BASE SCHEMA              #
 #=========================================================#
 class HistoryItem(BaseModel):
+    history_id: Optional[int] = None
     scan_id: int
     disease_name: str
     urgency_level: str
