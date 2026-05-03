@@ -3,7 +3,7 @@
 
 # app/ai/hybrid_dygnosis_model.py
 from sqlalchemy.orm import Session
-from app.ai.predictor import DiseasePredictor
+from app._ai.predictor import DiseasePredictor
 from app.models.disease import Disease
 from typing import Dict, Any
 
