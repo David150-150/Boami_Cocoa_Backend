@@ -12,5 +12,3 @@ app/_ai/runs/
 uploads/
 *.log
 app/_ai/model/best.pt
-app/_ai/
-app/ai/
