@@ -462,6 +462,111 @@ def format_treatments(disease, predicted_name: str) -> list:
 # 1. IMAGE PREDICTION  →  POST /ai/predict
 # ================================================================
 
+# @router.post("/predict", response_model=APIResponse)
+# async def predict_disease(
+#     file: UploadFile = File(...),
+#     latitude:  Optional[float] = None,
+#     longitude: Optional[float] = None,
+#     db: Session = Depends(get_db),
+#     current_user=Depends(get_current_user),
+# ):
+#     try:
+#         image_bytes = await file.read()
+
+#         # --- YOLO prediction ---
+#        # --- YOLO prediction ---
+# model      = AIService.image_model()
+# prediction = model.predict(image_bytes)
+
+# predicted_name  = prediction.get("disease")
+# confidence      = prediction.get("confidence", 0.0)
+# status          = prediction.get("status", "Unknown")
+# annotated_image = prediction.get("annotated_image")
+
+# # =========================
+# # CONFIDENCE LOGIC FIX
+# # =========================
+# THRESHOLD = 0.7
+# HEALTHY_THRESHOLD = 0.5
+
+# if not predicted_name:
+#     predicted_name = None
+#     status = "Uncertain"
+#     confidence = 0.0
+
+# elif "healthy" in predicted_name.lower():
+#     if confidence < HEALTHY_THRESHOLD:
+#         predicted_name = None
+#         status = "Uncertain"
+#         confidence = 0.0
+#     else:
+#         status = "Healthy"
+
+# else:
+#     if confidence < THRESHOLD:
+#         predicted_name = None
+#         status = "Uncertain"
+#         confidence = 0.0
+#     else:
+#         status = "Detected"
+
+# # =========================
+# # CONTINUE NORMAL FLOW
+# # =========================
+
+# # --- Upload original ---
+# original_url = upload_bytes_to_cloudinary(
+#     image_bytes, folder="boa_mi_cocoa/scans/original"
+# )
+
+# # --- Upload annotated ---
+# annotated_url = None
+# if annotated_image:
+#     try:
+#         annotated_url = upload_bytes_to_cloudinary(
+#             annotated_image, folder="boa_mi_cocoa/scans/annotated"
+#         )
+#     except Exception as e:
+#         logger.warning("Annotated upload failed: %s", e)
+
+#         # --- Match disease in DB ---
+#         disease    = find_matching_disease(db, predicted_name)
+#         treatments = format_treatments(disease, predicted_name)
+
+#         # --- Save scan ---
+#         scan_data = ScanCreate(
+#             user_id          = int(current_user.user_id),
+#             image_url        = original_url,
+#             disease_id       = disease.disease_id if disease else None,
+#             custom_label     = "image",
+#             confidence_score = confidence,
+#             urgency_level    = get_urgency(confidence),
+#             latitude         = latitude,
+#             longitude        = longitude,
+#             description      = f"Image scan: {predicted_name or 'Healthy'}",
+#         )
+#         saved_scan = create_scan(db, scan_data)
+
+#         return APIResponse(
+#             success=True,
+#             message="Prediction successful",
+#             data={
+#                 "scan_id":           saved_scan.scan_id,
+#                 "original_image":    original_url,
+#                 "annotated_image":   annotated_url,
+#                 "predicted_disease": predicted_name,
+#                 "status":            status,
+#                 "confidence":        confidence,
+#                 "urgency":           get_urgency(confidence),
+#                 "treatments":        treatments,
+#             },
+#         )
+
+#     except Exception as e:
+#         logger.exception("Image prediction failed")
+#         return APIResponse(success=False, message=str(e), data=None)
+
+
 @router.post("/predict", response_model=APIResponse)
 async def predict_disease(
     file: UploadFile = File(...),
@@ -474,20 +579,45 @@ async def predict_disease(
         image_bytes = await file.read()
 
         # --- YOLO prediction ---
-        model      = AIService.image_model()
+        model = AIService.image_model()
         prediction = model.predict(image_bytes)
 
         predicted_name  = prediction.get("disease")
         confidence      = prediction.get("confidence", 0.0)
         status          = prediction.get("status", "Unknown")
         annotated_image = prediction.get("annotated_image")
-        
-        THRESHOLD = 0.7
 
-        if not predicted_name or confidence < THRESHOLD:
+        # =========================
+        # CONFIDENCE LOGIC FIX
+        # =========================
+        THRESHOLD = 0.7
+        HEALTHY_THRESHOLD = 0.5
+
+        if not predicted_name:
             predicted_name = None
             status = "Uncertain"
             confidence = 0.0
+
+        elif "healthy" in predicted_name.lower():
+            if confidence < HEALTHY_THRESHOLD:
+                predicted_name = None
+                status = "Uncertain"
+                confidence = 0.0
+            else:
+                status = "Healthy"
+
+        else:
+            if confidence < THRESHOLD:
+                predicted_name = None
+                status = "Uncertain"
+                confidence = 0.0
+            else:
+                status = "Detected"
+
+        # =========================
+        # CONTINUE NORMAL FLOW
+        # =========================
+
         # --- Upload original ---
         original_url = upload_bytes_to_cloudinary(
             image_bytes, folder="boa_mi_cocoa/scans/original"
@@ -517,7 +647,7 @@ async def predict_disease(
             urgency_level    = get_urgency(confidence),
             latitude         = latitude,
             longitude        = longitude,
-            description      = f"Image scan: {predicted_name or 'Healthy'}",
+            description      = f"Image scan: {predicted_name or 'Uncertain'}",
         )
         saved_scan = create_scan(db, scan_data)
 
