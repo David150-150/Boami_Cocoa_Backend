@@ -481,7 +481,13 @@ async def predict_disease(
         confidence      = prediction.get("confidence", 0.0)
         status          = prediction.get("status", "Unknown")
         annotated_image = prediction.get("annotated_image")
+        
+        THRESHOLD = 0.7
 
+        if not predicted_name or confidence < THRESHOLD:
+            predicted_name = None
+            status = "Uncertain"
+            confidence = 0.0
         # --- Upload original ---
         original_url = upload_bytes_to_cloudinary(
             image_bytes, folder="boa_mi_cocoa/scans/original"
