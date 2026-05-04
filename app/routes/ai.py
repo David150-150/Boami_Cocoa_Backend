@@ -381,6 +381,14 @@ from app._ai.ai_services import AIService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+# ✅ ADD THIS HERE 👇
+POD_CLASSES = [
+    "healthy",
+    "frosty_pod",
+    "black_pod",
+    "pod_rot",
+    "pod_borer"
+]
 
 
 # ================================================================
