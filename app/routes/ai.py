@@ -492,27 +492,47 @@ async def predict_disease(
         # =========================
         # CONFIDENCE + HEALTHY FIX
         # =========================
+        # THRESHOLD = 0.7
+        # HEALTHY_THRESHOLD = 0.5
+
+        # # CASE 1: No prediction OR weak confidence → treat as Healthy
+        # if not predicted_name or confidence < THRESHOLD:
+        #     predicted_name = "Healthy"
+        #     status = "Healthy"
+        #     confidence = max(confidence, 0.5)
+
+        # # CASE 2: Explicit healthy prediction
+        # elif "healthy" in predicted_name.lower():
+        #     if confidence < HEALTHY_THRESHOLD:
+        #         predicted_name = "Healthy"
+        #         status = "Healthy"
+        #         confidence = 0.5
+        #     else:
+        #         status = "Healthy"
+
+        # # CASE 3: Disease detected
+        # else:
+        #     status = "Detected"
         THRESHOLD = 0.7
-        HEALTHY_THRESHOLD = 0.5
+        LOW_CONF_THRESHOLD = 0.4
 
-        # CASE 1: No prediction OR weak confidence → treat as Healthy
-        if not predicted_name or confidence < THRESHOLD:
-            predicted_name = "Healthy"
-            status = "Healthy"
-            confidence = max(confidence, 0.5)
+        if not predicted_name or confidence < LOW_CONF_THRESHOLD:
+            predicted_name = None
+            status = "Invalid image or not a cocoa pod"
+            confidence = 0.0
 
-        # CASE 2: Explicit healthy prediction
         elif "healthy" in predicted_name.lower():
-            if confidence < HEALTHY_THRESHOLD:
-                predicted_name = "Healthy"
+            if confidence >= 0.6:
                 status = "Healthy"
-                confidence = 0.5
             else:
-                status = "Healthy"
+                status = "Uncertain"
 
-        # CASE 3: Disease detected
-        else:
+        elif confidence >= THRESHOLD:
             status = "Detected"
+
+        else:
+            predicted_name = None
+            status = "Uncertain"
 
         # =========================
         # UPLOAD IMAGES
