@@ -381,14 +381,6 @@ from app._ai.ai_services import AIService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-# ✅ ADD THIS HERE 👇
-POD_CLASSES = [
-    "healthy",
-    "frosty_pod",
-    "black_pod",
-    "pod_rot",
-    "pod_borer"
-]
 
 
 # ================================================================
@@ -500,47 +492,28 @@ async def predict_disease(
         # =========================
         # CONFIDENCE + HEALTHY FIX
         # =========================
-        # THRESHOLD = 0.7
-        # HEALTHY_THRESHOLD = 0.5
-
-        # # CASE 1: No prediction OR weak confidence → treat as Healthy
-        # if not predicted_name or confidence < THRESHOLD:
-        #     predicted_name = "Healthy"
-        #     status = "Healthy"
-        #     confidence = max(confidence, 0.5)
-
-        # # CASE 2: Explicit healthy prediction
-        # elif "healthy" in predicted_name.lower():
-        #     if confidence < HEALTHY_THRESHOLD:
-        #         predicted_name = "Healthy"
-        #         status = "Healthy"
-        #         confidence = 0.5
-        #     else:
-        #         status = "Healthy"
-
-        # # CASE 3: Disease detected
-        # else:
-        #     status = "Detected"
         THRESHOLD = 0.7
-        LOW_CONF_THRESHOLD = 0.4
+        HEALTHY_THRESHOLD = 0.5
 
-        if not predicted_name or confidence < LOW_CONF_THRESHOLD:
-            predicted_name = None
-            status = "Invalid image or not a cocoa pod"
-            confidence = 0.0
+        # CASE 1: No prediction OR weak confidence → treat as Healthy
+        if not predicted_name or confidence < THRESHOLD:
+            predicted_name = "Healthy"
+            status = "Healthy"
+            confidence = max(confidence, 0.5)
 
+        # CASE 2: Explicit healthy prediction
         elif "healthy" in predicted_name.lower():
-            if confidence >= 0.6:
+            if confidence < HEALTHY_THRESHOLD:
+                predicted_name = "Healthy"
                 status = "Healthy"
+                confidence = 0.5
             else:
-                status = "Uncertain"
+                status = "Healthy"
 
-        elif confidence >= THRESHOLD:
-            status = "Detected"
-
+        # CASE 3: Disease detected
         else:
-            predicted_name = None
-            status = "Uncertain"
+            status = "Detected"
+        
 
         # =========================
         # UPLOAD IMAGES
