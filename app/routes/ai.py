@@ -549,7 +549,8 @@ async def predict_disease(
             disease_id=disease.disease_id if disease else None,
             custom_label="image",
             confidence_score=confidence,
-            urgency_level=get_urgency(confidence),
+            #urgency_level=get_urgency(confidence),
+            urgency_level=get_urgency(confidence, predicted_name),  # ✅ FIXED
             latitude=latitude,
             longitude=longitude,
             description=f"Image scan: {predicted_name}",
@@ -571,7 +572,8 @@ async def predict_disease(
                 "predicted_disease": predicted_name,
                 "status": status,
                 "confidence": confidence,
-                "urgency": get_urgency(confidence),
+                # "urgency": get_urgency(confidence),
+                "urgency": get_urgency(confidence, predicted_name),
                 "treatments": treatments,
             },
         )
@@ -723,7 +725,11 @@ async def voice_diagnosis(
 
         predicted_name = diagnosis.get("predicted_disease")
         confidence     = diagnosis.get("confidence", 0.0)
-        urgency        = diagnosis.get("urgency_level", get_urgency(confidence))
+        #urgency        = diagnosis.get("urgency_level", get_urgency(confidence))
+        urgency = diagnosis.get("urgency_level",get_urgency(confidence, predicted_name))
+    
+    
+
 
         disease    = find_matching_disease(db, predicted_name)
         treatments = format_treatments(disease, predicted_name)
@@ -780,8 +786,12 @@ async def predict_from_symptoms(
 
         predicted_name = diagnosis.get("predicted_disease")
         confidence     = diagnosis.get("confidence", 0.0)
-        urgency        = diagnosis.get("urgency_level", get_urgency(confidence))
+        #urgency        = diagnosis.get("urgency_level", get_urgency(confidence))
+        urgency = diagnosis.get( "urgency_level",get_urgency(confidence, predicted_name))
 
+
+   
+    
         disease    = find_matching_disease(db, predicted_name)
         treatments = format_treatments(disease, predicted_name)
 
@@ -859,7 +869,8 @@ async def combined_diagnosis(
             final_confidence = round(payload.image_confidence * IMAGE_WEIGHT, 4)
             final_disease = payload.image_disease or payload.symptom_disease
 
-        urgency    = get_urgency(final_confidence)
+        #urgency    = get_urgency(final_confidence)
+        urgency = get_urgency(final_confidence, final_disease)
         disease    = find_matching_disease(db, final_disease)
         treatments = format_treatments(disease, final_disease)
 
