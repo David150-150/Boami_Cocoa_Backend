@@ -414,13 +414,21 @@ class CombinedInput(BaseModel):
 # HELPERS
 # ================================================================
 
-def get_urgency(confidence: float) -> str:
+# def get_urgency(confidence: float) -> str:
+#     if confidence >= 0.75:
+#         return "High"
+#     elif confidence >= 0.45:
+#         return "Medium"
+#     return "Low"
+def get_urgency(confidence: float, disease: str = None) -> str:
+    if disease and "healthy" in disease.lower():
+        return "Low"
+
     if confidence >= 0.75:
         return "High"
     elif confidence >= 0.45:
         return "Medium"
     return "Low"
-
 
 def normalize_label(label: str) -> str:
     if not label:
