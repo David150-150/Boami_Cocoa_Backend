@@ -41,10 +41,10 @@ class SymptomInput(BaseModel):
 
 class CombinedInput(BaseModel):
     scan_id:            int
-    image_confidence:   float
-    image_disease:      Optional[str] = None
-    symptom_confidence: float = 0.0
-    symptom_disease:    Optional[str] = None
+    # image_confidence:   float
+    # image_disease:      Optional[str] = None
+    # symptom_confidence: float = 0.0
+    # symptom_disease:    Optional[str] = None
 
 
 # ================================================================
