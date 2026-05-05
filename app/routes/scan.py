@@ -475,10 +475,12 @@
 
 
 
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 import logging
+from pydantic import ValidationError
 
 from app.crud.scan import (
     create_scan, get_all_scans, get_scan_by_id,
@@ -515,14 +517,30 @@ def read_my_scans(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
     return APIResponse(success=True, message=f"{len(scans)} scans found", data=scans)
 
 # ================================================================
-# GET SINGLE SCAN - FIXED ✅
+# GET SINGLE SCAN - BULLETPROOF ✅
 # ================================================================
 @router.get("/{scan_id}", response_model=APIResponse)
 def read_scan(scan_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     scan = get_scan_by_id(db, scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
-    return APIResponse(success=True, message="Scan found", data=scan)
+    
+    # ⭐ EXPLICIT MANUAL CONVERSION - 100% WORKS
+    scan_data = {
+        "scan_id": scan.scan_id,
+        "user_id": scan.user_id,
+        "disease_id": scan.disease_id,
+        "image_url": scan.image_url,
+        "audio_url": getattr(scan, 'audio_url', None),
+        "custom_label": scan.custom_label,
+        "confidence_score": scan.confidence_score,
+        "urgency_level": scan.urgency_level,
+        "latitude": scan.latitude,
+        "longitude": scan.longitude,
+        "created_at": scan.created_at.isoformat() if scan.created_at else None
+    }
+    
+    return APIResponse(success=True, message="Scan found", data=scan_data)
 
 # ================================================================
 # CREATE SCAN
